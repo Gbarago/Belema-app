@@ -7,8 +7,10 @@ import '../blocs/bank/bank_bloc.dart';
 import '../blocs/bank/bank_event.dart';
 import '../blocs/bank/bank_state.dart';
 import '../blocs/auth/auth_bloc.dart';
-import '../blocs/auth/auth_event.dart';
 import '../blocs/auth/auth_state.dart';
+
+import '../widgets/transactions_item_card.dart';
+import '../../core/constants/app_colors.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -66,8 +68,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.of(context).pushNamed('/set-pin');
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CB954),
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.accentGreen,
+              foregroundColor: AppColors.white,
             ),
             child: Text('Create PIN', style: GoogleFonts.outfit()),
           ),
@@ -84,18 +86,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Green Theme Color
-    const kPrimaryGreen = Color(0xFF005831); // Adjusted for the dark green look
-    const kAccentGreen = Color(0xFF1CB954);
-    const kYellow = Color(0xFFFFC107);
-
     return Scaffold(
-      backgroundColor: Colors.white, // Main body background
+      backgroundColor: AppColors.white, // Main body background
       body: BlocBuilder<BankBloc, BankState>(
         builder: (context, state) {
           if (state is BankLoading) {
             return const Center(
-              child: CircularProgressIndicator(color: kPrimaryGreen),
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
             );
           } else if (state is BankDataLoaded) {
             final account = state.account;
@@ -117,8 +114,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
                             colors: [
-                              kPrimaryGreen,
-                              Color(0xFF107A3B),
+                              AppColors.primaryGreen,
+                              AppColors.gradientGreenEnd,
                             ], // Darker accent green, but still lighter than primary (005831)
                           ),
                         ),
@@ -176,7 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                   child: const Icon(
                                     Icons.notifications_outlined,
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                   ),
                                 ),
                               ],
@@ -231,14 +228,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         Text(
                                           account.accountNumber,
                                           style: GoogleFonts.outfit(
-                                            color: Colors.white,
+                                            color: AppColors.white,
                                             fontSize: 16,
                                           ),
                                         ),
                                         const SizedBox(width: 18),
                                         const Icon(
                                           Icons.copy,
-                                          color: Colors.white,
+                                          color: AppColors.white,
                                           size: 12,
                                         ),
                                       ],
@@ -253,9 +250,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             Row(
                               children: [
                                 if (_isBalanceVisible)
-                                  Text(
+                                  const Text(
                                     '₦ ',
-                                    style: TextStyle(color: Colors.white),
+                                    style: TextStyle(color: AppColors.white),
                                   ),
                                 const SizedBox(width: 7),
                                 Text(
@@ -263,7 +260,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ? formatter.format(account.balance)
                                       : '****',
                                   style: GoogleFonts.outfit(
-                                    color: Colors.white,
+                                    color: AppColors.white,
                                     fontSize: 32,
                                     height: 1.6,
                                     fontWeight: FontWeight.bold,
@@ -280,7 +277,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     _isBalanceVisible
                                         ? Icons.visibility_off_outlined
                                         : Icons.visibility_outlined,
-                                    color: Colors.white70,
+                                    color: AppColors.white.withOpacity(0.7),
                                     size: 20,
                                   ),
                                 ),
@@ -293,21 +290,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   TextSpan(
                                     text: 'Book balance ',
                                     style: GoogleFonts.outfit(
-                                      color: Colors.white70,
+                                      color: AppColors.white.withOpacity(0.7),
                                       fontSize: 14,
                                     ),
                                   ),
-                                  const TextSpan(
+                                  TextSpan(
                                     text: '₦', // Naira symbol with system font
                                     style: TextStyle(
-                                      color: Colors.white70,
+                                      color: AppColors.white.withOpacity(0.7),
                                       fontSize: 14,
                                     ),
                                   ),
                                   TextSpan(
                                     text: '1,500,000.34',
                                     style: GoogleFonts.outfit(
-                                      color: Colors.white70,
+                                      color: AppColors.white.withOpacity(0.7),
                                       fontSize: 14,
                                     ),
                                   ),
@@ -337,19 +334,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     },
                                     icon: const Icon(
                                       Icons.send,
-                                      color: Colors.black,
+                                      color: AppColors.textDark,
                                       size: 18,
                                     ),
                                     label: Text(
                                       'Send Money',
                                       style: GoogleFonts.outfit(
-                                        color: Colors.black,
+                                        color: AppColors.textDark,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: kYellow,
-                                      foregroundColor: Colors.black87,
+                                      backgroundColor: AppColors.primaryYellow,
+                                      foregroundColor: AppColors.textDark,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 16,
                                       ),
@@ -370,26 +367,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       //  color: Colors.white.withOpacity(0.15),
                                       border: Border.all(
                                         width: 1,
-                                        color: Colors.white.withOpacity(0.5),
+                                        color: AppColors.white.withOpacity(0.5),
                                       ),
                                     ),
                                     child: ElevatedButton.icon(
                                       onPressed: () {},
                                       icon: const Icon(
                                         Icons.add,
-                                        color: Colors.white,
+                                        color: AppColors.white,
                                         size: 18,
                                       ),
                                       label: Text(
                                         'Top Up',
                                         style: GoogleFonts.outfit(
-                                          color: Colors.white,
+                                          color: AppColors.white,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
-
                                         padding: const EdgeInsets.symmetric(
                                           vertical: 16,
                                         ),
@@ -399,8 +395,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           ),
                                         ),
                                         elevation: 0,
+                                        // iconAlignment: IconAlignment.end, // Check if this property is valid for ElevatedButton.icon in this version, it was in SharedButton. Assuming yes since it was used in previous code.
                                       ),
-
                                       iconAlignment: IconAlignment.end,
                                     ),
                                   ),
@@ -410,7 +406,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                       width: 1,
-                                      color: Colors.white.withOpacity(0.5),
+                                      color: AppColors.white.withOpacity(0.5),
                                     ),
                                     shape: BoxShape.circle,
                                   ),
@@ -418,7 +414,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     onPressed: () {},
                                     icon: const Icon(
                                       Icons.more_horiz,
-                                      color: Colors.white,
+                                      color: AppColors.white,
                                     ),
                                   ),
                                 ),
@@ -443,7 +439,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 style: GoogleFonts.outfit(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white70,
+                                  color: AppColors.white.withOpacity(0.7),
                                 ),
                               ),
                               const SizedBox(height: 3),
@@ -456,19 +452,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     _buildShortcutItem(
                                       Icons.credit_card,
                                       'Cards',
-                                      kAccentGreen,
+                                      AppColors.accentGreen,
                                     ),
 
                                     _buildShortcutItem(
                                       Icons.receipt_long,
                                       'Bills Payment',
-                                      kAccentGreen,
+                                      AppColors.accentGreen,
                                     ),
 
                                     _buildShortcutItem(
                                       Icons.account_balance_wallet,
                                       'Expenses',
-                                      kAccentGreen,
+                                      AppColors.accentGreen,
                                     ),
                                   ],
                                 ),
@@ -497,14 +493,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               style: GoogleFonts.outfit(
                                 fontSize: 19,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: AppColors.textDark,
                               ),
                             ),
                             Text(
                               'See more >',
                               style: GoogleFonts.outfit(
                                 fontSize: 14,
-                                color: Colors.black87,
+                                color: AppColors.textDark,
                               ),
                             ),
                           ],
@@ -543,7 +539,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 padding: EdgeInsets.zero,
                                 itemBuilder: (context, index) {
                                   final tx = transactions[index];
-                                  return _buildTransactionItem(tx, index);
+                                  return TransactionsItemCard(transaction: tx);
                                 },
                               ),
                         const SizedBox(height: 24),
@@ -578,8 +574,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: kPrimaryGreen,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: AppColors.primaryGreen,
+        unselectedItemColor: AppColors.textGrey,
         selectedLabelStyle: GoogleFonts.outfit(
           fontSize: 12,
           fontWeight: FontWeight.w600,
@@ -631,97 +627,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             style: GoogleFonts.outfit(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: AppColors.textDark,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionItem(dynamic tx, int index) {
-    // Determine credit/debit mainly for color, though design shows all same icon style usually
-    // We'll stick to simple logic: Credit = Green Text, Debit = Black/Red Text
-    final isCredit = tx.type.toString().toLowerCase() == 'credit';
-    final formatter = NumberFormat.currency(
-      symbol: '',
-    ); // Remove default symbol
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.send_outlined,
-              color: Colors.black54,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tx.description,
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'Transfer', // Static subtitle per design or tx.type
-                  style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: isCredit ? '+' : '-',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: isCredit ? Colors.blue : Colors.black87,
-                      ),
-                    ),
-                    TextSpan(
-                      text: '₦', // Safe system font
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: isCredit ? Colors.blue : Colors.black87,
-                      ),
-                    ),
-                    TextSpan(
-                      text: formatter.format(tx.amount),
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: isCredit ? Colors.blue : Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                '20 Mins ago', // Mock time or use tx.date relative time
-                style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
-              ),
-            ],
           ),
         ],
       ),

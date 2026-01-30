@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../blocs/bank/bank_bloc.dart';
 import '../blocs/bank/bank_event.dart';
 import '../blocs/bank/bank_state.dart';
+import '../widgets/shared_button.dart';
+
+import '../../core/constants/app_colors.dart';
 
 class SetPinScreen extends StatefulWidget {
   const SetPinScreen({super.key});
@@ -30,19 +33,19 @@ class _SetPinScreenState extends State<SetPinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Setup Transaction PIN',
           style: GoogleFonts.outfit(
-            color: Colors.black,
+            color: AppColors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -52,7 +55,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.success,
               ),
             );
             Navigator.pop(context);
@@ -61,7 +64,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.actionSuccess!),
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppColors.success,
                 ),
               );
               Navigator.pop(context);
@@ -69,7 +72,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.actionError!),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                 ),
               );
             }
@@ -77,7 +80,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.error,
               ),
             );
           }
@@ -94,7 +97,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: AppColors.black,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -102,7 +105,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                   'Create a 4-digit PIN for authorizing transactions.',
                   style: GoogleFonts.outfit(
                     fontSize: 16,
-                    color: Colors.black54,
+                    color: AppColors.textDark.withOpacity(0.54),
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -151,7 +154,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
       obscureText: !isVisible,
       maxLength: 4,
       style: const TextStyle(
-        color: Colors.black,
+        color: AppColors.black,
         fontSize: 24,
         letterSpacing: 20,
       ),
@@ -159,7 +162,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(
-          color: Colors.black54,
+          color: AppColors.textDark, // was black54
           fontSize: 16,
           letterSpacing: 0,
         ),
@@ -167,19 +170,19 @@ class _SetPinScreenState extends State<SetPinScreen> {
         suffixIcon: IconButton(
           icon: Icon(
             isVisible ? Icons.visibility : Icons.visibility_off,
-            color: Colors.grey,
+            color: AppColors.textGrey,
           ),
           onPressed: onVisibilityChanged,
         ),
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: AppColors.lightGrey,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF1CB954), width: 1),
+          borderSide: const BorderSide(color: AppColors.accentGreen, width: 1),
         ),
       ),
       validator: (value) {
@@ -221,36 +224,16 @@ class _SetPinScreenState extends State<SetPinScreen> {
             state is BankLoading ||
             (state is BankDataLoaded && state.isLoading);
 
-        return SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: isLoading
-                ? null
-                : () {
-                    if (_formKey.currentState!.validate()) {
-                      context.read<BankBloc>().add(
-                        SetPinSubmitted(_pinController.text),
-                      );
-                    }
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CB954),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
-                : Text(
-                    'Set PIN',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-          ),
+        return SharedButton(
+          label: 'Set PIN',
+          isLoading: isLoading,
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              context.read<BankBloc>().add(
+                SetPinSubmitted(_pinController.text),
+              );
+            }
+          },
         );
       },
     );

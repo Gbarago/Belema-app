@@ -4,6 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../blocs/bank/bank_bloc.dart';
 import '../blocs/bank/bank_event.dart';
 import '../blocs/bank/bank_state.dart';
+import '../widgets/shared_button.dart';
+import '../widgets/shared_text_field.dart';
+import '../../core/utils/thousands_formatter.dart';
+
+import '../../core/constants/app_colors.dart';
 
 class TransferScreen extends StatefulWidget {
   const TransferScreen({super.key});
@@ -30,19 +35,19 @@ class _TransferScreenState extends State<TransferScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Send Money',
           style: GoogleFonts.outfit(
-            color: Colors.black,
+            color: AppColors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -52,7 +57,7 @@ class _TransferScreenState extends State<TransferScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.success,
               ),
             );
             Navigator.pop(context);
@@ -62,7 +67,7 @@ class _TransferScreenState extends State<TransferScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.actionSuccess!),
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppColors.success,
                 ),
               );
               Navigator.pop(context);
@@ -70,7 +75,7 @@ class _TransferScreenState extends State<TransferScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.actionError!),
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                 ),
               );
             }
@@ -78,7 +83,7 @@ class _TransferScreenState extends State<TransferScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: AppColors.error,
               ),
             );
           }
@@ -90,23 +95,25 @@ class _TransferScreenState extends State<TransferScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTextField(
+                SharedTextField(
                   controller: _accountController,
                   label: 'Destination Account Number',
                   icon: Icons.account_balance_outlined,
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 20),
-                _buildTextField(
+                SharedTextField(
                   controller: _amountController,
                   label: 'Amount',
-                  icon: Icons.attach_money,
+                  prefixText: '₦ ',
+                  icon: null,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  inputFormatters: [ThousandsFormatter(allowFraction: true)],
                 ),
                 const SizedBox(height: 20),
-                _buildTextField(
+                SharedTextField(
                   controller: _pinController,
                   label: 'Transaction PIN',
                   icon: Icons.lock_outline,
@@ -126,106 +133,36 @@ class _TransferScreenState extends State<TransferScreen> {
                   },
                 ),
                 const SizedBox(height: 40),
-                _buildTransferButton(),
+                BlocBuilder<BankBloc, BankState>(
+                  builder: (context, state) {
+                    final isLoading =
+                        state is BankLoading ||
+                        (state is BankDataLoaded && state.isLoading);
+
+                    return SharedButton(
+                      label: 'Confirm Transfer',
+                      isLoading: isLoading,
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          context.read<BankBloc>().add(
+                            TransferSubmitted(
+                              amount: double.parse(
+                                _amountController.text.replaceAll(',', ''),
+                              ),
+                              destinationAccount: _accountController.text,
+                              pin: _pinController.text,
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool isPassword = false,
-    bool isVisible = false,
-    VoidCallback? onVisibilityChanged,
-    TextInputType? keyboardType,
-    int? maxLength,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      obscureText: isPassword && !isVisible,
-      keyboardType: keyboardType,
-      maxLength: maxLength,
-      style: const TextStyle(color: Colors.black),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.black54),
-        prefixIcon: Icon(icon, color: Colors.black54),
-        suffixIcon: isPassword
-            ? IconButton(
-                icon: Icon(
-                  isVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey,
-                ),
-                onPressed: onVisibilityChanged,
-              )
-            : null,
-        counterStyle: const TextStyle(color: Colors.black54),
-        filled: true,
-        fillColor: Colors.grey[100],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF1CB954), width: 1),
-        ),
-      ),
-      validator:
-          validator ??
-          (value) => value == null || value.isEmpty ? 'Field required' : null,
-    );
-  }
-
-  Widget _buildTransferButton() {
-    return BlocBuilder<BankBloc, BankState>(
-      builder: (context, state) {
-        final isLoading =
-            state is BankLoading ||
-            (state is BankDataLoaded && state.isLoading);
-
-        return SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: isLoading
-                ? null
-                : () {
-                    if (_formKey.currentState!.validate()) {
-                      context.read<BankBloc>().add(
-                        TransferSubmitted(
-                          amount: double.parse(_amountController.text),
-                          destinationAccount: _accountController.text,
-                          pin: _pinController.text,
-                        ),
-                      );
-                    }
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1CB954),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: isLoading
-                ? const CircularProgressIndicator(color: Colors.white)
-                : Text(
-                    'Confirm Transfer',
-                    style: GoogleFonts.outfit(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-          ),
-        );
-      },
     );
   }
 }
