@@ -100,361 +100,399 @@ class _DashboardScreenState extends State<DashboardScreen> {
           } else if (state is BankDataLoaded) {
             final account = state.account;
             final transactions = state.transactions;
-            final formatter = NumberFormat.currency(symbol: '₦');
+            final formatter = NumberFormat.currency(symbol: '');
 
-            return Column(
-              children: [
-                // Top Section (Green Background)
-                Expanded(
-                  flex: 7,
-                  child: Container(
-                    color: kPrimaryGreen,
-                    padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Stack for Green Header + Floating Shortcuts
+                  Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      // Green Background & Top Content
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              kPrimaryGreen,
+                              Color(0xFF107A3B),
+                            ], // Darker accent green, but still lighter than primary (005831)
+                          ),
+                        ),
+                        padding: const EdgeInsets.only(
+                          left: 15,
+                          right: 15,
+                          top: 60,
+                          bottom: 90, // Increased by 10px as requested (was 80)
+                        ), // Extra bottom padding for overlap
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Header
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const CircleAvatar(
+                                      radius: 20,
+                                      backgroundImage: NetworkImage(
+                                        'https://i.pravatar.cc/150?u=a042581f4e29026704d',
+                                      ),
+                                      backgroundColor: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Hello,',
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white70,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        Text(
+                                          account.accountName,
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.notifications_outlined,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Account Tags
                             Row(
                               children: [
-                                const CircleAvatar(
-                                  radius: 20,
-                                  backgroundImage: NetworkImage(
-                                    'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-                                  ), // Mock image
-                                  backgroundColor: Colors.grey,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    'Tier 1',
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
-                                const SizedBox(width: 12),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Hello,',
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white70,
-                                        fontSize: 12,
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    Clipboard.setData(
+                                      ClipboardData(
+                                        text: account.accountNumber,
                                       ),
-                                    ),
-                                    Text(
-                                      account.accountName,
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Account number copied!'),
                                       ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 4,
                                     ),
-                                  ],
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          account.accountNumber,
+                                          style: GoogleFonts.outfit(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 18),
+                                        const Icon(
+                                          Icons.copy,
+                                          color: Colors.white,
+                                          size: 12,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.notifications_outlined,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
+                            const SizedBox(height: 24),
 
-                        // Account Tags
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                'Tier 1',
-                                style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () {
-                                Clipboard.setData(
-                                  ClipboardData(text: account.accountNumber),
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Account number copied!'),
+                            // Main Balance
+                            Row(
+                              children: [
+                                if (_isBalanceVisible)
+                                  Text(
+                                    '₦ ',
+                                    style: TextStyle(color: Colors.white),
                                   ),
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      account.accountNumber,
-                                      style: GoogleFonts.outfit(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(
-                                      Icons.copy,
-                                      color: Colors.white,
-                                      size: 12,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Main Balance
-                        Row(
-                          children: [
-                            Text(
-                              '₦ ',
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 19,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              _isBalanceVisible
-                                  ? formatter.format(account.balance)
-                                  : '****',
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isBalanceVisible = !_isBalanceVisible;
-                                });
-                              },
-                              child: Icon(
-                                _isBalanceVisible
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: Colors.white70,
-                                size: 20,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Book balance ₦1,500,000.34', // Mock data as per request logic
-                          style: GoogleFonts.outfit(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 25),
-
-                        // Action Buttons
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: () {
-                                  final authState = context
-                                      .read<AuthBloc>()
-                                      .state;
-                                  if (authState is Authenticated) {
-                                    if (!authState.user.hasPin) {
-                                      _showCreatePinDialog();
-                                    } else {
-                                      Navigator.of(
-                                        context,
-                                      ).pushNamed('/transfer');
-                                    }
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.send,
-                                  color: Colors.black,
-                                  size: 18,
-                                ),
-                                label: Text(
-                                  'Send Money',
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: kYellow,
-                                  foregroundColor: Colors.black87,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  elevation: 0,
-                                  iconAlignment: IconAlignment.end,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                label: Text(
-                                  'Top Up',
+                                const SizedBox(width: 7),
+                                Text(
+                                  _isBalanceVisible
+                                      ? formatter.format(account.balance)
+                                      : '****',
                                   style: GoogleFonts.outfit(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 32,
+                                    height: 1.6,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.15,
-                                  ),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  elevation: 0,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
-                                  Icons.more_horiz,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Scrollable Content
-                Expanded(
-                  flex: 6,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 24),
-                        // Shortcuts
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                          child: Text(
-                            'Shortcuts',
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          // padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Container(
-                            // color: kAccentGreen,
-                            child: Row(
-                              children: [
-                                _buildShortcutItem(
-                                  Icons.credit_card,
-                                  'Cards',
-                                  kAccentGreen,
                                 ),
                                 const SizedBox(width: 12),
-                                _buildShortcutItem(
-                                  Icons.receipt_long,
-                                  'Bills Payment',
-                                  kAccentGreen,
-                                ),
-                                const SizedBox(width: 12),
-                                _buildShortcutItem(
-                                  Icons.account_balance_wallet,
-                                  'Expenses',
-                                  kAccentGreen,
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _isBalanceVisible = !_isBalanceVisible;
+                                    });
+                                  },
+                                  child: Icon(
+                                    _isBalanceVisible
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: Colors.white70,
+                                    size: 20,
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
+                            // const SizedBox(height: 1),
+                            Text(
+                              'Book balance ₦1,500,000.34',
+                              style: GoogleFonts.outfit(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 25),
 
-                        // Transactions
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            // Action Buttons
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      final authState = context
+                                          .read<AuthBloc>()
+                                          .state;
+                                      if (authState is Authenticated) {
+                                        if (!authState.user.hasPin) {
+                                          _showCreatePinDialog();
+                                        } else {
+                                          Navigator.of(
+                                            context,
+                                          ).pushNamed('/transfer');
+                                        }
+                                      }
+                                    },
+                                    icon: const Icon(
+                                      Icons.send,
+                                      color: Colors.black,
+                                      size: 18,
+                                    ),
+                                    label: Text(
+                                      'Send Money',
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: kYellow,
+                                      foregroundColor: Colors.black87,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      elevation: 0,
+                                      iconAlignment: IconAlignment.end,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+
+                                      //  color: Colors.white.withOpacity(0.15),
+                                      border: Border.all(
+                                        width: 1,
+                                        color: Colors.white.withOpacity(0.5),
+                                      ),
+                                    ),
+                                    child: ElevatedButton.icon(
+                                      onPressed: () {},
+                                      icon: const Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                      label: Text(
+                                        'Top Up',
+                                        style: GoogleFonts.outfit(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.transparent,
+
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            30,
+                                          ),
+                                        ),
+                                        elevation: 0,
+                                      ),
+
+                                      iconAlignment: IconAlignment.end,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      width: 1,
+                                      color: Colors.white.withOpacity(0.5),
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    onPressed: () {},
+                                    icon: const Icon(
+                                      Icons.more_horiz,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Floating Shortcuts Section
+                      Positioned(
+                        bottom: -55, // Float halfway out
+                        left: 0,
+                        right: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 15),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Transactions',
+                                'Shortcuts',
                                 style: GoogleFonts.outfit(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: Colors.white70,
                                 ),
                               ),
-                              Text(
-                                'See more >',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 14,
-                                  color: Colors.grey,
+                              const SizedBox(height: 3),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+
+                                child: Row(
+                                  children: [
+                                    _buildShortcutItem(
+                                      Icons.credit_card,
+                                      'Cards',
+                                      kAccentGreen,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    _buildShortcutItem(
+                                      Icons.receipt_long,
+                                      'Bills Payment',
+                                      kAccentGreen,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    _buildShortcutItem(
+                                      Icons.account_balance_wallet,
+                                      'Expenses',
+                                      kAccentGreen,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Spacer for the floating element overlap
+                  const SizedBox(height: 60),
+
+                  // Transactions List Layout
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Transactions',
+                              style: GoogleFonts.outfit(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            Text(
+                              'See more >',
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: transactions.length,
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          padding: EdgeInsets.zero,
                           itemBuilder: (context, index) {
                             final tx = transactions[index];
                             return _buildTransactionItem(tx, index);
@@ -464,8 +502,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           } else if (state is BankError) {
             return Center(
@@ -522,7 +560,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildShortcutItem(IconData icon, String label, Color color) {
     return Container(
       width: 150,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.grey[50], // Very light grey bg
         borderRadius: BorderRadius.circular(12),

@@ -20,16 +20,19 @@ class _SetPinScreenState extends State<SetPinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1218),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Setup Transaction PIN',
-          style: GoogleFonts.outfit(color: Colors.white),
+          style: GoogleFonts.outfit(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -64,7 +67,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -72,7 +75,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                   'Create a 4-digit PIN for authorizing transactions.',
                   style: GoogleFonts.outfit(
                     fontSize: 16,
-                    color: Colors.white70,
+                    color: Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -107,7 +110,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
       obscureText: true,
       maxLength: 4,
       style: const TextStyle(
-        color: Colors.white,
+        color: Colors.black,
         fontSize: 24,
         letterSpacing: 20,
       ),
@@ -115,13 +118,13 @@ class _SetPinScreenState extends State<SetPinScreen> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(
-          color: Colors.white60,
+          color: Colors.black54,
           fontSize: 16,
           letterSpacing: 0,
         ),
         counterText: '',
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.05),
+        fillColor: Colors.grey[100],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -133,8 +136,29 @@ class _SetPinScreenState extends State<SetPinScreen> {
       ),
       validator: (value) {
         if (value == null || value.length != 4) return 'PIN must be 4 digits';
-        if (isConfirm && value != _pinController.text) {
-          return 'PINs do not match';
+
+        if (isConfirm) {
+          if (value != _pinController.text) {
+            return 'PINs do not match';
+          }
+        } else {
+          // Strength checks for the main PIN field
+          if (RegExp(r'^(\d)\1{3}$').hasMatch(value)) {
+            return 'Use a stronger PIN (no repeats)';
+          }
+
+          // Check sequential
+          bool isSeqAsc = true;
+          bool isSeqDesc = true;
+          for (int i = 0; i < 3; i++) {
+            int current = int.parse(value[i]);
+            int next = int.parse(value[i + 1]);
+            if (next != current + 1) isSeqAsc = false;
+            if (next != current - 1) isSeqDesc = false;
+          }
+          if (isSeqAsc || isSeqDesc) {
+            return 'Use a stronger PIN (no sequences)';
+          }
         }
         return null;
       },
