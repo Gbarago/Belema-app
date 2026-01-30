@@ -123,8 +123,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                         padding: const EdgeInsets.only(
-                          left: 15,
-                          right: 15,
+                          left: 10,
+                          right: 10,
                           top: 60,
                           bottom: 90, // Increased by 10px as requested (was 80)
                         ), // Extra bottom padding for overlap
@@ -287,11 +287,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ],
                             ),
                             // const SizedBox(height: 1),
-                            Text(
-                              'Book balance ₦1,500,000.34',
-                              style: GoogleFonts.outfit(
-                                color: Colors.white70,
-                                fontSize: 14,
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Book balance ',
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: '₦', // Naira symbol with system font
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: '1,500,000.34',
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 25),
@@ -414,7 +434,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         left: 0,
                         right: 0,
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 15),
+                          padding: const EdgeInsets.only(left: 10, right: 10),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -431,19 +451,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 scrollDirection: Axis.horizontal,
 
                                 child: Row(
+                                  spacing: 8,
                                   children: [
                                     _buildShortcutItem(
                                       Icons.credit_card,
                                       'Cards',
                                       kAccentGreen,
                                     ),
-                                    const SizedBox(width: 12),
+
                                     _buildShortcutItem(
                                       Icons.receipt_long,
                                       'Bills Payment',
                                       kAccentGreen,
                                     ),
-                                    const SizedBox(width: 12),
+
                                     _buildShortcutItem(
                                       Icons.account_balance_wallet,
                                       'Expenses',
@@ -467,13 +488,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     child: Column(
                       children: [
+                        const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               'Transactions',
                               style: GoogleFonts.outfit(
-                                fontSize: 18,
+                                fontSize: 19,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
@@ -482,22 +504,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               'See more >',
                               style: GoogleFonts.outfit(
                                 fontSize: 14,
-                                color: Colors.grey,
+                                color: Colors.black87,
                               ),
                             ),
                           ],
                         ),
+                        Divider(),
                         const SizedBox(height: 16),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: transactions.length,
-                          padding: EdgeInsets.zero,
-                          itemBuilder: (context, index) {
-                            final tx = transactions[index];
-                            return _buildTransactionItem(tx, index);
-                          },
-                        ),
+                        transactions.isEmpty
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 40,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Icon(
+                                        Icons.history_toggle_off,
+                                        size: 48,
+                                        color: Colors.grey[300],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'You have no transactions yet',
+                                        style: GoogleFonts.outfit(
+                                          fontSize: 14,
+                                          color: Colors.grey[500],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: transactions.length,
+                                padding: EdgeInsets.zero,
+                                itemBuilder: (context, index) {
+                                  final tx = transactions[index];
+                                  return _buildTransactionItem(tx, index);
+                                },
+                              ),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -581,8 +629,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Text(
             label,
             style: GoogleFonts.outfit(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
@@ -595,7 +643,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Determine credit/debit mainly for color, though design shows all same icon style usually
     // We'll stick to simple logic: Credit = Green Text, Debit = Black/Red Text
     final isCredit = tx.type.toString().toLowerCase() == 'credit';
-    final formatter = NumberFormat.currency(symbol: '₦');
+    final formatter = NumberFormat.currency(
+      symbol: '',
+    ); // Remove default symbol
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -637,14 +687,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                '${isCredit ? '+' : '-'}${formatter.format(tx.amount)}',
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  // Design shows blue for credit, black for debit?
-                  // Following typical patterns or design image
-                  color: isCredit ? Colors.blue : Colors.black87,
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: isCredit ? '+' : '-',
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isCredit ? Colors.blue : Colors.black87,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '₦', // Safe system font
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isCredit ? Colors.blue : Colors.black87,
+                      ),
+                    ),
+                    TextSpan(
+                      text: formatter.format(tx.amount),
+                      style: GoogleFonts.outfit(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isCredit ? Colors.blue : Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Text(

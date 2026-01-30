@@ -17,6 +17,16 @@ class _SetPinScreenState extends State<SetPinScreen> {
   final _confirmPinController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  bool _isPinVisible = false;
+  bool _isConfirmPinVisible = false;
+
+  @override
+  void dispose() {
+    _pinController.dispose();
+    _confirmPinController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +56,23 @@ class _SetPinScreenState extends State<SetPinScreen> {
               ),
             );
             Navigator.pop(context);
+          } else if (state is BankDataLoaded) {
+            if (state.actionSuccess != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.actionSuccess!),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              Navigator.pop(context);
+            } else if (state.actionError != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.actionError!),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           } else if (state is BankError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -82,12 +109,24 @@ class _SetPinScreenState extends State<SetPinScreen> {
                 _buildPinField(
                   controller: _pinController,
                   label: 'Transaction PIN',
+                  isVisible: _isPinVisible,
+                  onVisibilityChanged: () {
+                    setState(() {
+                      _isPinVisible = !_isPinVisible;
+                    });
+                  },
                 ),
                 const SizedBox(height: 20),
                 _buildPinField(
                   controller: _confirmPinController,
                   label: 'Confirm PIN',
                   isConfirm: true,
+                  isVisible: _isConfirmPinVisible,
+                  onVisibilityChanged: () {
+                    setState(() {
+                      _isConfirmPinVisible = !_isConfirmPinVisible;
+                    });
+                  },
                 ),
                 const SizedBox(height: 40),
                 _buildSubmitButton(),
@@ -103,11 +142,13 @@ class _SetPinScreenState extends State<SetPinScreen> {
     required TextEditingController controller,
     required String label,
     bool isConfirm = false,
+    bool isVisible = false,
+    VoidCallback? onVisibilityChanged,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: TextInputType.number,
-      obscureText: true,
+      obscureText: !isVisible,
       maxLength: 4,
       style: const TextStyle(
         color: Colors.black,
@@ -123,6 +164,13 @@ class _SetPinScreenState extends State<SetPinScreen> {
           letterSpacing: 0,
         ),
         counterText: '',
+        suffixIcon: IconButton(
+          icon: Icon(
+            isVisible ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: onVisibilityChanged,
+        ),
         filled: true,
         fillColor: Colors.grey[100],
         border: OutlineInputBorder(
@@ -168,11 +216,16 @@ class _SetPinScreenState extends State<SetPinScreen> {
   Widget _buildSubmitButton() {
     return BlocBuilder<BankBloc, BankState>(
       builder: (context, state) {
+        // Also check boolean loading flag
+        final isLoading =
+            state is BankLoading ||
+            (state is BankDataLoaded && state.isLoading);
+
         return SizedBox(
           width: double.infinity,
           height: 56,
           child: ElevatedButton(
-            onPressed: state is BankLoading
+            onPressed: isLoading
                 ? null
                 : () {
                     if (_formKey.currentState!.validate()) {
@@ -188,7 +241,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: state is BankLoading
+            child: isLoading
                 ? const CircularProgressIndicator(color: Colors.white)
                 : Text(
                     'Set PIN',

@@ -48,11 +48,49 @@ class BankBloc extends Bloc<BankEvent, BankState> {
     SetPinSubmitted event,
     Emitter<BankState> emit,
   ) async {
-    emit(BankLoading());
+    final currentState = state;
+    if (currentState is BankDataLoaded) {
+      emit(
+        currentState.copyWith(
+          isLoading: true,
+          clearError: true,
+          clearSuccess: true,
+        ),
+      );
+    } else {
+      emit(BankLoading());
+    }
+
     final result = await setPinUseCase(event.pin);
+
     result.fold(
-      (failure) => emit(BankError(failure.message)),
-      (_) => emit(const ActionSuccess('PIN set successfully')),
+      (failure) {
+        if (currentState is BankDataLoaded) {
+          emit(
+            currentState.copyWith(
+              isLoading: false,
+              actionError: failure.message,
+            ),
+          );
+        } else {
+          emit(BankError(failure.message));
+        }
+      },
+      (_) {
+        if (currentState is BankDataLoaded) {
+          emit(
+            currentState.copyWith(
+              isLoading: false,
+              actionSuccess: 'PIN set successfully',
+              clearError: true,
+            ),
+          );
+          add(FetchBankData());
+        } else {
+          emit(const ActionSuccess('PIN set successfully'));
+          add(FetchBankData());
+        }
+      },
     );
   }
 
@@ -60,7 +98,19 @@ class BankBloc extends Bloc<BankEvent, BankState> {
     TransferSubmitted event,
     Emitter<BankState> emit,
   ) async {
-    emit(BankLoading());
+    final currentState = state;
+    if (currentState is BankDataLoaded) {
+      emit(
+        currentState.copyWith(
+          isLoading: true,
+          clearError: true,
+          clearSuccess: true,
+        ),
+      );
+    } else {
+      emit(BankLoading());
+    }
+
     final result = await transferUseCase(
       TransferParams(
         amount: event.amount,
@@ -70,8 +120,33 @@ class BankBloc extends Bloc<BankEvent, BankState> {
     );
 
     result.fold(
-      (failure) => emit(BankError(failure.message)),
-      (_) => emit(const ActionSuccess('Transfer successful')),
+      (failure) {
+        if (currentState is BankDataLoaded) {
+          emit(
+            currentState.copyWith(
+              isLoading: false,
+              actionError: failure.message,
+            ),
+          );
+        } else {
+          emit(BankError(failure.message));
+        }
+      },
+      (_) {
+        if (currentState is BankDataLoaded) {
+          emit(
+            currentState.copyWith(
+              isLoading: false,
+              actionSuccess: 'Transfer successful',
+              clearError: true,
+            ),
+          );
+          add(FetchBankData());
+        } else {
+          emit(const ActionSuccess('Transfer successful'));
+          add(FetchBankData());
+        }
+      },
     );
   }
 }

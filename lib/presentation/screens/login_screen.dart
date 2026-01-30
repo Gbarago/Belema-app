@@ -16,6 +16,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isPasswordVisible = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +79,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: 'Password',
                     icon: Icons.lock_outline,
                     isPassword: true,
+                    isVisible: _isPasswordVisible,
+                    onVisibilityChanged: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
                   ),
                   const SizedBox(height: 40),
                   _buildLoginButton(),
@@ -88,15 +102,26 @@ class _LoginScreenState extends State<LoginScreen> {
     required String label,
     required IconData icon,
     bool isPassword = false,
+    bool isVisible = false,
+    VoidCallback? onVisibilityChanged,
   }) {
     return TextFormField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword && !isVisible,
       style: const TextStyle(color: Colors.black), // Dark Input Text
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.black54),
         prefixIcon: Icon(icon, color: Colors.black54),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  isVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: onVisibilityChanged,
+              )
+            : null,
         filled: true,
         fillColor: Colors.grey[100], // Light grey fill
         border: OutlineInputBorder(

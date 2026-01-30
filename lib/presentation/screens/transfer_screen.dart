@@ -17,6 +17,15 @@ class _TransferScreenState extends State<TransferScreen> {
   final _accountController = TextEditingController();
   final _pinController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isPinVisible = false;
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _accountController.dispose();
+    _pinController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +57,23 @@ class _TransferScreenState extends State<TransferScreen> {
             );
             Navigator.pop(context);
             context.read<BankBloc>().add(FetchBankData());
+          } else if (state is BankDataLoaded) {
+            if (state.actionSuccess != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.actionSuccess!),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              Navigator.pop(context);
+            } else if (state.actionError != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.actionError!),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           } else if (state is BankError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -85,8 +111,19 @@ class _TransferScreenState extends State<TransferScreen> {
                   label: 'Transaction PIN',
                   icon: Icons.lock_outline,
                   isPassword: true,
+                  isVisible: _isPinVisible,
+                  onVisibilityChanged: () {
+                    setState(() {
+                      _isPinVisible = !_isPinVisible;
+                    });
+                  },
                   keyboardType: TextInputType.number,
                   maxLength: 4,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'PIN required';
+                    if (value.length != 4) return 'PIN must be 4 digits';
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 40),
                 _buildTransferButton(),
@@ -103,12 +140,15 @@ class _TransferScreenState extends State<TransferScreen> {
     required String label,
     required IconData icon,
     bool isPassword = false,
+    bool isVisible = false,
+    VoidCallback? onVisibilityChanged,
     TextInputType? keyboardType,
     int? maxLength,
+    String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: isPassword && !isVisible,
       keyboardType: keyboardType,
       maxLength: maxLength,
       style: const TextStyle(color: Colors.black),
@@ -116,6 +156,15 @@ class _TransferScreenState extends State<TransferScreen> {
         labelText: label,
         labelStyle: const TextStyle(color: Colors.black54),
         prefixIcon: Icon(icon, color: Colors.black54),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  isVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: onVisibilityChanged,
+              )
+            : null,
         counterStyle: const TextStyle(color: Colors.black54),
         filled: true,
         fillColor: Colors.grey[100],
@@ -128,19 +177,24 @@ class _TransferScreenState extends State<TransferScreen> {
           borderSide: const BorderSide(color: Color(0xFF1CB954), width: 1),
         ),
       ),
-      validator: (value) =>
-          value == null || value.isEmpty ? 'Field required' : null,
+      validator:
+          validator ??
+          (value) => value == null || value.isEmpty ? 'Field required' : null,
     );
   }
 
   Widget _buildTransferButton() {
     return BlocBuilder<BankBloc, BankState>(
       builder: (context, state) {
+        final isLoading =
+            state is BankLoading ||
+            (state is BankDataLoaded && state.isLoading);
+
         return SizedBox(
           width: double.infinity,
           height: 56,
           child: ElevatedButton(
-            onPressed: state is BankLoading
+            onPressed: isLoading
                 ? null
                 : () {
                     if (_formKey.currentState!.validate()) {
@@ -160,7 +214,7 @@ class _TransferScreenState extends State<TransferScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: state is BankLoading
+            child: isLoading
                 ? const CircularProgressIndicator(color: Colors.white)
                 : Text(
                     'Confirm Transfer',

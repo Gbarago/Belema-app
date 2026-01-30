@@ -2,10 +2,16 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'dart:async'; // Added for StreamController
+
 class ApiClient {
   final Dio dio;
   final FlutterSecureStorage storage;
   static const String baseUrl = 'https://testbank-one.vercel.app/api/';
+
+  // Stream to notify listeners about authentication errors (401)
+  final _authErrorController = StreamController<void>.broadcast();
+  Stream<void> get authErrorStream => _authErrorController.stream;
 
   ApiClient({required this.dio, required this.storage}) {
     dio.options.baseUrl = baseUrl;
@@ -22,7 +28,10 @@ class ApiClient {
           return handler.next(options);
         },
         onError: (DioException e, handler) {
-          // Handle global errors here if needed
+          // Check for 401 Unauthorized
+          if (e.response?.statusCode == 401) {
+            _authErrorController.add(null);
+          }
           return handler.next(e);
         },
       ),
