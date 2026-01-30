@@ -156,7 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         Text(
                                           account.accountName,
                                           style: GoogleFonts.outfit(
-                                            color: Colors.white,
+                                            color: AppColors.white,
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -168,7 +168,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
+                                    color: AppColors.white.withOpacity(0.2),
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
@@ -333,7 +333,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       }
                                     },
                                     icon: const Icon(
-                                      Icons.send,
+                                      Icons.send_outlined,
                                       color: AppColors.textDark,
                                       size: 18,
                                     ),
@@ -484,7 +484,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     child: Column(
                       children: [
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -505,7 +505,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ],
                         ),
-                        Divider(),
+                        const SizedBox(height: 10),
+                        Divider(height: 0.7),
                         const SizedBox(height: 16),
                         transactions.isEmpty
                             ? Center(
